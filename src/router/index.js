@@ -8,7 +8,8 @@ const router = createRouter({
     { path: "/", redirect: { name: "funds" } },
     { path: "/funds", name: "funds", component: PlaceholderView },
     { path: "/report", name: "report", component: PlaceholderView },
-    { path: "/fortune", name: "fortune", component: PlaceholderView }
+    { path: "/fortune", name: "fortune", component: PlaceholderView },
+    { path: "/simulator", name: "simulator", component: PlaceholderView }
   ]
 });
 

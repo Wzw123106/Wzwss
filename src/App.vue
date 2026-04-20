@@ -8,6 +8,7 @@ import SidebarNav from "./components/SidebarNav.vue";
 import FundList from "./components/FundList.vue";
 import WatchlistTable from "./components/WatchlistTable.vue";
 import FortunePage from "./components/FortunePage.vue";
+import SimulatorPage from "./components/SimulatorPage.vue";
 import { createQuotesPoller, fetchAllQuotes } from "./services/quotesService";
 import { buildRationalJudgement } from "./utils/judgementEngine";
 import { fetchHistory } from "./services/historyService";
@@ -45,6 +46,7 @@ const router = useRouter();
 const currentPage = computed(() => {
   if (route.name === "report") return "report";
   if (route.name === "fortune") return "fortune";
+  if (route.name === "simulator") return "simulator";
   return "funds";
 });
 
@@ -336,6 +338,10 @@ function openFortunePage() {
   router.push({ name: "fortune" });
 }
 
+function openSimulatorPage() {
+  router.push({ name: "simulator" });
+}
+
 async function restoreFundsView() {
   if (restoringFundsView.value) return;
   restoringFundsView.value = true;
@@ -527,7 +533,13 @@ watch(
   <main class="layout">
     <div class="frame">
       <div class="shell" :class="{ reportMode: currentPage !== 'funds' }">
-      <SidebarNav :active="currentPage" @open-report="openReportPage" @open-funds="openFundsPage" @open-fortune="openFortunePage" />
+      <SidebarNav
+        :active="currentPage"
+        @open-report="openReportPage"
+        @open-funds="openFundsPage"
+        @open-fortune="openFortunePage"
+        @open-simulator="openSimulatorPage"
+      />
 
       <FundList v-if="currentPage === 'funds'" :items="quotesPayload.items" :selected-id="selectedId" @select="selectRow" />
 
@@ -759,7 +771,8 @@ watch(
             </section>
           </el-drawer>
         </section>
-        <FortunePage v-else />
+        <FortunePage v-else-if="currentPage === 'fortune'" />
+        <SimulatorPage v-else />
       </section>
       </div>
     </div>

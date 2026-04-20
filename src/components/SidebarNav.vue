@@ -1,5 +1,5 @@
 <script setup>
-const emit = defineEmits(["open-report", "open-funds", "open-fortune"]);
+const emit = defineEmits(["open-report", "open-funds", "open-fortune", "open-simulator"]);
 
 defineProps({
   active: { type: String, default: "funds" }
@@ -17,6 +17,9 @@ defineProps({
         <span class="dot"></span>
       </button>
       <button class="item" :class="{ on: active === 'fortune' }" title="小六壬" @click="emit('open-fortune')">
+        <span class="dot"></span>
+      </button>
+      <button class="item" :class="{ on: active === 'simulator' }" title="模拟器" @click="emit('open-simulator')">
         <span class="dot"></span>
       </button>
     </div>
