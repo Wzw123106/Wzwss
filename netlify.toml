@@ -1,0 +1,32 @@
+# Netlify：https://docs.netlify.com/configure-builds/file-based-configuration/
+#
+# 线上环境与本地 dev 不同：浏览器不能直接请求东方财富域名（CORS）。
+# 前端默认走同源的 /__em-* 前缀。仅用 [[redirects]] 代理时，上游可能因 IP/头信息拒绝；
+# 因此用 netlify/edge-functions/eastmoney-proxy.js 在边缘转发并附带 Referer / User-Agent（与 vite proxy 行为接近）。
+
+[build]
+  command = "yarn build"
+  publish = "dist"
+
+# 东方财富代理：路径与 edge-functions/eastmoney-proxy.js 文件名（不含扩展名）对应
+[[edge_functions]]
+  path = "/__em-push2/*"
+  function = "eastmoney-proxy"
+
+[[edge_functions]]
+  path = "/__em-push2his/*"
+  function = "eastmoney-proxy"
+
+[[edge_functions]]
+  path = "/__em-fundgz/*"
+  function = "eastmoney-proxy"
+
+[[edge_functions]]
+  path = "/__em-fund/*"
+  function = "eastmoney-proxy"
+
+# 单页应用兜底（放在最后；__em-* 由 Edge Function 优先拦截）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
