@@ -1,31 +1,40 @@
 # Netlify：https://docs.netlify.com/configure-builds/file-based-configuration/
 #
 # 线上环境与本地 dev 不同：浏览器不能直接请求东方财富域名（CORS）。
-# 前端默认走同源的 /__em-* 前缀。仅用 [[redirects]] 代理时，上游可能因 IP/头信息拒绝；
-# 因此用 netlify/edge-functions/eastmoney-proxy.js 在边缘转发并附带 Referer / User-Agent（与 vite proxy 行为接近）。
+# 前端默认走同源的 /__em-* 前缀，这里改用 Netlify Functions 转发（比 Edge 超时更宽松）。
 
 [build]
   command = "yarn build"
   publish = "dist"
 
-# 东方财富代理：路径与 edge-functions/eastmoney-proxy.js 文件名（不含扩展名）对应
-[[edge_functions]]
-  path = "/__em-push2/*"
-  function = "eastmoney-proxy"
+[functions]
+  directory = "netlify/functions"
 
-[[edge_functions]]
-  path = "/__em-push2his/*"
-  function = "eastmoney-proxy"
+[[redirects]]
+  from = "/__em-push2/*"
+  to = "/.netlify/functions/eastmoney-proxy/push2/:splat"
+  status = 200
+  force = true
 
-[[edge_functions]]
-  path = "/__em-fundgz/*"
-  function = "eastmoney-proxy"
+[[redirects]]
+  from = "/__em-push2his/*"
+  to = "/.netlify/functions/eastmoney-proxy/push2his/:splat"
+  status = 200
+  force = true
 
-[[edge_functions]]
-  path = "/__em-fund/*"
-  function = "eastmoney-proxy"
+[[redirects]]
+  from = "/__em-fundgz/*"
+  to = "/.netlify/functions/eastmoney-proxy/fundgz/:splat"
+  status = 200
+  force = true
 
-# 单页应用兜底（放在最后；__em-* 由 Edge Function 优先拦截）
+[[redirects]]
+  from = "/__em-fund/*"
+  to = "/.netlify/functions/eastmoney-proxy/fund/:splat"
+  status = 200
+  force = true
+
+# 单页应用兜底（放在最后）
 [[redirects]]
   from = "/*"
   to = "/index.html"
