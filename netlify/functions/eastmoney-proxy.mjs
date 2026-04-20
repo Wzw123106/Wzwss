@@ -12,19 +12,49 @@ function buildTargetUrl(rawUrl, service, restPath) {
   return `${origin}${restPath}${reqUrl.search}`;
 }
 
+function resolveProxyPath(event) {
+  const rawUrl = event.rawUrl || "";
+  const pathname = rawUrl ? new URL(rawUrl).pathname : event.path || "";
+
+  const viaFunctionPath = pathname.match(
+    /\/\.netlify\/functions\/eastmoney-proxy\/([^/]+)(\/.*)?$/
+  );
+  if (viaFunctionPath) {
+    return {
+      service: viaFunctionPath[1],
+      restPath: viaFunctionPath[2] || ""
+    };
+  }
+
+  const directPrefixes = [
+    ["/__em-push2his", "push2his"],
+    ["/__em-push2", "push2"],
+    ["/__em-fundgz", "fundgz"],
+    ["/__em-fund", "fund"]
+  ];
+  for (const [prefix, service] of directPrefixes) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      return {
+        service,
+        restPath: pathname.slice(prefix.length) || ""
+      };
+    }
+  }
+
+  return null;
+}
+
 export const handler = async (event) => {
   try {
-    const path = event.path || "";
-    const match = path.match(/\/\.netlify\/functions\/eastmoney-proxy\/([^/]+)(\/.*)?$/);
-    if (!match) {
+    const parsed = resolveProxyPath(event);
+    if (!parsed) {
       return {
         statusCode: 400,
         body: "Invalid proxy path"
       };
     }
 
-    const service = match[1];
-    const restPath = match[2] || "";
+    const { service, restPath } = parsed;
     const targetUrl = buildTargetUrl(event.rawUrl, service, restPath);
     if (!targetUrl) {
       return {
